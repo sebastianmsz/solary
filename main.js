@@ -10,13 +10,33 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/api.js":
+/*!********************!*\
+  !*** ./src/api.js ***!
+  \********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   autocomplete: () => (/* binding */ autocomplete),\n/* harmony export */   getFormattedWeatherInfo: () => (/* binding */ getFormattedWeatherInfo)\n/* harmony export */ });\nconst AUTH_KEY = '2a5eb57601d6487a8e9194349242603';\n\nasync function getWeatherInfo(location) {\n  try {\n    const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?q=${location}&days=4&key=${AUTH_KEY}`, {\n      mode: 'cors'\n    });\n    if (!response.ok) {\n      throw new Error('Failed to fetch weather data');\n    }\n    const weatherInfo = await response.json();\n    return weatherInfo;\n  } catch (error) {\n    console.error('Error fetching weather data:', error);\n    return null;\n  }\n}\nasync function getFormattedWeatherInfo(location, tempUnit) {\n  try {\n    const weatherInfo = await getWeatherInfo(location, tempUnit);\n    let formattedForecastInfo = [];\n    for (let i = 1; i < 4; i++) {\n      let date = weatherInfo.forecast.forecastday[i].date;\n      let maxTemp = tempUnit === 'f' ? weatherInfo.forecast.forecastday[i].day.maxtemp_f : weatherInfo.forecast.forecastday[i].day.maxtemp_c;\n      let minTemp = tempUnit === 'f' ? weatherInfo.forecast.forecastday[i].day.mintemp_f : weatherInfo.forecast.forecastday[i].day.mintemp_c;\n      let condition = weatherInfo.forecast.forecastday[i].day.condition.text;\n      formattedForecastInfo.push({\n        date,\n        maxTemp,\n        minTemp,\n        condition\n      });\n    }\n    let currentHour = new Date().getHours();\n    let formattedHourlyForecast = [];\n    for (let i = 0; i < 10; i++) {\n      let time = (currentHour + i) % 24;\n      let temp = tempUnit === 'f' ? weatherInfo.forecast.forecastday[0].hour[i].temp_f : weatherInfo.forecast.forecastday[0].hour[i].temp_c;\n      let condition = weatherInfo.forecast.forecastday[0].hour[i].condition.text;\n      formattedHourlyForecast.push({\n        time,\n        temp,\n        condition\n      });\n    }\n    let formattedWeatherInfo = {\n      location: weatherInfo.location.name,\n      region: weatherInfo.location.region,\n      country: weatherInfo.location.country,\n      currentTemp: tempUnit === 'f' ? weatherInfo.current.temp_f : weatherInfo.current.temp_c,\n      condition: weatherInfo.current.condition.text,\n      hourlyForecast: formattedHourlyForecast,\n      forecast: formattedForecastInfo\n    };\n    return formattedWeatherInfo;\n  } catch (error) {\n    console.error('Error fetching weather data:', error);\n    return null;\n  }\n}\nasync function autocomplete(input) {\n  const response = await fetch(`https://api.weatherapi.com/v1/search.json?key=${AUTH_KEY}&q=${input}`, {\n    mode: 'cors'\n  });\n  const autocompletion = await response.json();\n  let formattedAutocompletion = [];\n  autocompletion.forEach(element => {\n    formattedAutocompletion.push(`${element.name}, ${element.region}`);\n  });\n  return formattedAutocompletion;\n}\n\n//# sourceURL=webpack://web-app-template/./src/api.js?");
+
+/***/ }),
+
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
   \**********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.css */ \"./src/style.css\");\n\nasync function getWeatherInfo(city) {\n  try {\n    const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=2a5eb57601d6487a8e9194349242603&q=${city}`, {\n      mode: 'cors'\n    });\n    if (!response.ok) {\n      throw new Error('Failed to fetch weather data');\n    }\n    const weatherInfo = await response.json();\n    return weatherInfo;\n  } catch (error) {\n    console.error('Error fetching weather data:', error);\n    return null;\n  }\n}\n\n//# sourceURL=webpack://web-app-template/./src/index.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.css */ \"./src/style.css\");\n/* harmony import */ var _ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ui */ \"./src/ui.js\");\n\n\n(0,_ui__WEBPACK_IMPORTED_MODULE_1__[\"default\"])();\n\n//# sourceURL=webpack://web-app-template/./src/index.js?");
+
+/***/ }),
+
+/***/ "./src/ui.js":
+/*!*******************!*\
+  !*** ./src/ui.js ***!
+  \*******************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ ui)\n/* harmony export */ });\n/* harmony import */ var _api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api.js */ \"./src/api.js\");\n\nasync function ui() {\n  const location = 'Saint-Georges';\n  const tempUnit = 'c';\n  const weatherInfo = await (0,_api_js__WEBPACK_IMPORTED_MODULE_0__.getFormattedWeatherInfo)(location, tempUnit);\n  console.log(weatherInfo);\n}\n\n//# sourceURL=webpack://web-app-template/./src/ui.js?");
 
 /***/ }),
 
