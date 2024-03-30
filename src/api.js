@@ -54,12 +54,11 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 		let formattedWeatherInfo = {
 			location: weatherInfo.location.name,
 			region: weatherInfo.location.region,
-			country: weatherInfo.location.country,
+			condition: weatherInfo.current.condition.text,
 			currentTemp:
 				tempUnit === 'f'
 					? weatherInfo.current.temp_f
 					: weatherInfo.current.temp_c,
-			condition: weatherInfo.current.condition.text,
 			hourlyForecast: formattedHourlyForecast,
 			forecast: formattedForecastInfo,
 		};
@@ -79,7 +78,7 @@ async function autocomplete(input) {
 	const autocompletion = await response.json();
 	let formattedAutocompletion = [];
 	autocompletion.forEach((element) => {
-		formattedAutocompletion.push(`${element.name}, ${element.region}`);
+		formattedAutocompletion.push(element);
 	});
 	return formattedAutocompletion;
 }

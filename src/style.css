@@ -115,7 +115,7 @@ blockquote:before,
 blockquote:after,
 q:before,
 q:after {
-	content: "";
+	content: '';
 	content: none;
 }
 table {
@@ -124,10 +124,10 @@ table {
 }
 /*css reset*/
 /*global*/
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
 :root {
-	--system-ui: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
-		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	--system-ui: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 	box-sizing: border-box;
 }
 :root > * {
@@ -143,4 +143,31 @@ button:hover {
 button:active {
 	filter: brightness(0.95);
 }
-/*global*/
+
+#completionsContainer {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background-color: white;
+	border-radius: 0.5rem;
+	box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	max-height: 20rem;
+}
+
+#completionsContainer div:hover {
+	background-color: #f0f0f0;
+	cursor: pointer;
+}
+
+#completionsContainer div {
+	padding: 0.5rem;
+}
+
+#searchBarContainer {
+	width: fit-content;
+	position: relative;
+}
