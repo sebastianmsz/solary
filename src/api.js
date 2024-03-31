@@ -3,7 +3,7 @@ export { getFormattedWeatherInfo, autocomplete };
 async function getWeatherInfo(location) {
 	try {
 		const response = await fetch(
-			`https://api.weatherapi.com/v1/forecast.json?q=${location}&days=4&key=${AUTH_KEY}`,
+			`https://api.weatherapi.com/v1/forecast.json?q=${location}&days=6&key=${AUTH_KEY}`,
 			{
 				mode: 'cors',
 			},
@@ -22,9 +22,48 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 	try {
 		const weatherInfo = await getWeatherInfo(location, tempUnit);
 
-		let formattedForecastInfo = [];
-		for (let i = 1; i < 4; i++) {
+		let currentWeather = [];
+		let todayForecast = [];
+		let futureForecast = [];
+
+		//current weather
+		let currentTemp =
+			tempUnit === 'f'
+				? weatherInfo.current.temp_f
+				: weatherInfo.current.temp_c;
+		let condition = weatherInfo.current.condition.text;
+		let humidity = weatherInfo.current.humidity;
+		let wind = weatherInfo.current.wind_mph;
+		let sunrise = weatherInfo.forecast.forecastday[0].astro.sunrise;
+		let sunset = weatherInfo.forecast.forecastday[0].astro.sunset;
+		currentWeather.push({
+			currentTemp,
+			condition,
+			humidity,
+			wind,
+			sunrise,
+			sunset,
+		});
+
+		//today forecast
+		let currentHour = new Date().getHours();
+		for (let i = 0; i < 10; i++) {
+			let time = (currentHour + i) % 24;
+			let temp =
+				tempUnit === 'f'
+					? weatherInfo.forecast.forecastday[0].hour[i].temp_f
+					: weatherInfo.forecast.forecastday[0].hour[i].temp_c;
+			let condition =
+				weatherInfo.forecast.forecastday[0].hour[i].condition.text;
+			todayForecast.push({ time, temp, condition });
+		}
+
+		//future forecast
+		for (let i = 1; i < 6; i++) {
 			let date = weatherInfo.forecast.forecastday[i].date;
+			let dayOfWeek = new Date(date).toLocaleDateString('en-US', {
+				weekday: 'long',
+			});
 			let maxTemp =
 				tempUnit === 'f'
 					? weatherInfo.forecast.forecastday[i].day.maxtemp_f
@@ -35,34 +74,16 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 					: weatherInfo.forecast.forecastday[i].day.mintemp_c;
 			let condition =
 				weatherInfo.forecast.forecastday[i].day.condition.text;
-			formattedForecastInfo.push({ date, maxTemp, minTemp, condition });
-		}
-
-		let currentHour = new Date().getHours();
-		let formattedHourlyForecast = [];
-		for (let i = 0; i < 10; i++) {
-			let time = (currentHour + i) % 24;
-			let temp =
-				tempUnit === 'f'
-					? weatherInfo.forecast.forecastday[0].hour[i].temp_f
-					: weatherInfo.forecast.forecastday[0].hour[i].temp_c;
-			let condition =
-				weatherInfo.forecast.forecastday[0].hour[i].condition.text;
-			formattedHourlyForecast.push({ time, temp, condition });
+			futureForecast.push({ dayOfWeek, maxTemp, minTemp, condition });
 		}
 
 		let formattedWeatherInfo = {
 			location: weatherInfo.location.name,
 			region: weatherInfo.location.region,
-			condition: weatherInfo.current.condition.text,
-			currentTemp:
-				tempUnit === 'f'
-					? weatherInfo.current.temp_f
-					: weatherInfo.current.temp_c,
-			hourlyForecast: formattedHourlyForecast,
-			forecast: formattedForecastInfo,
+			currentWeather: currentWeather,
+			todayForecast: todayForecast,
+			futureForecast: futureForecast,
 		};
-
 		return formattedWeatherInfo;
 	} catch (error) {
 		console.error('Error fetching weather data:', error);

@@ -50,34 +50,52 @@ export default async function ui() {
 	function renderCurrentWeather(weatherInfo) {
 		const currentWeatherContainer =
 			document.querySelector('#currentWeather');
-		const location = document.createElement('h1');
-		location.setAttribute('id', 'location');
-		const region = document.createElement('h2');
-		const condition = document.createElement('h3');
-		const currentTemp = document.createElement('h3');
 		currentWeatherContainer.innerHTML = '';
+		const location = document.createElement('h2');
+		const region = document.createElement('h3');
+		const currentTemp = document.createElement('h3');
+		const condition = document.createElement('h3');
+		const humidity = document.createElement('h3');
+		const wind = document.createElement('h3');
+		const sunrise = document.createElement('h3');
+		const sunset = document.createElement('h3');
+
+		location.setAttribute('id', 'location');
 		location.textContent = weatherInfo.location;
 		region.textContent = weatherInfo.region;
-		condition.textContent = weatherInfo.condition;
-		currentTemp.textContent = weatherInfo.currentTemp;
+		currentTemp.textContent =
+			currentUnit === 'f'
+				? `${weatherInfo.currentWeather[0].currentTemp}°F`
+				: `${weatherInfo.currentWeather[0].currentTemp}°C`;
+		condition.textContent = weatherInfo.currentWeather[0].condition;
+		humidity.textContent = weatherInfo.currentWeather[0].humidity;
+		wind.textContent = weatherInfo.currentWeather[0].wind;
+		sunrise.textContent = weatherInfo.currentWeather[0].sunrise;
+		sunset.textContent = weatherInfo.currentWeather[0].sunset;
+
 		currentWeatherContainer.append(
 			location,
 			region,
-			condition,
 			currentTemp,
+			condition,
+			humidity,
+			wind,
+			sunrise,
+			sunset,
 		);
 	}
 
 	function renderTodayForecast(weatherInfo) {
 		const todayForecastContainer = document.querySelector('#todayForecast');
 		todayForecastContainer.innerHTML = '';
-		weatherInfo.hourlyForecast.forEach((hour) => {
+		weatherInfo.todayForecast.forEach((hour) => {
 			const hourContainer = document.createElement('div');
 			const time = document.createElement('h3');
 			const temp = document.createElement('h3');
 			const condition = document.createElement('h3');
-			time.textContent = `${hour.time}:00`;
-			temp.textContent = hour.temp;
+			time.textContent = hour.time;
+			temp.textContent =
+				currentUnit === 'f' ? `${hour.temp}°F` : `${hour.temp}°C`;
 			condition.textContent = hour.condition;
 			hourContainer.append(time, temp, condition);
 			todayForecastContainer.appendChild(hourContainer);
@@ -88,17 +106,19 @@ export default async function ui() {
 		const futureForecastContainer =
 			document.querySelector('#futureForecast');
 		futureForecastContainer.innerHTML = '';
-		weatherInfo.forecast.forEach((day) => {
+		weatherInfo.futureForecast.forEach((day) => {
 			const dayContainer = document.createElement('div');
-			const date = document.createElement('h3');
+			const dayOfWeek = document.createElement('h3');
 			const maxTemp = document.createElement('h3');
 			const minTemp = document.createElement('h3');
 			const condition = document.createElement('h3');
-			date.textContent = day.date;
-			maxTemp.textContent = `Max: ${day.maxTemp}`;
-			minTemp.textContent = `Min: ${day.minTemp}`;
+			dayOfWeek.textContent = day.dayOfWeek;
+			maxTemp.textContent =
+				currentUnit === 'f' ? `${day.maxTemp}°F` : `${day.maxTemp}°C`;
+			minTemp.textContent =
+				currentUnit === 'f' ? `${day.minTemp}°F` : `${day.minTemp}°C`;
 			condition.textContent = day.condition;
-			dayContainer.append(date, maxTemp, minTemp, condition);
+			dayContainer.append(dayOfWeek, maxTemp, minTemp, condition);
 			futureForecastContainer.appendChild(dayContainer);
 		});
 	}
@@ -125,25 +145,18 @@ export default async function ui() {
 		changeTemperatureUnitBtn.textContent =
 			unit === 'f' ? 'Change to Celsius' : 'Change to Fahrenheit';
 
-		changeTemperatureUnitBtn.removeEventListener(
-			'click',
-			tempUnitButtonClickHandler,
-		);
-
 		changeTemperatureUnitBtn.addEventListener(
 			'click',
 			tempUnitButtonClickHandler,
 		);
-
-		function tempUnitButtonClickHandler() {
-			const location = document.querySelector('#location').textContent;
-			const newUnit = unit === 'f' ? 'c' : 'f';
-			changeTemperatureUnitBtn.textContent =
-				newUnit === 'c' ? 'Change to Fahrenheit' : 'Change to Celsius';
-			currentUnit = newUnit;
-			updateWeatherInfo(location);
-		}
 	}
 
-	updateWeatherInfo('cali', 'c');
+	function tempUnitButtonClickHandler() {
+		const location = document.querySelector('#location').textContent;
+		const newUnit = currentUnit === 'f' ? 'c' : 'f';
+		currentUnit = newUnit;
+		updateWeatherInfo(location, newUnit);
+	}
+
+	updateWeatherInfo('London', 'c');
 }
