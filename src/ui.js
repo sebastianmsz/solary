@@ -56,7 +56,6 @@ export default async function ui() {
 		const currentTemp = document.createElement('p');
 		const condition = document.createElement('p');
 		const conditionImg = document.createElement('img');
-
 		location.setAttribute('id', 'location');
 		location.textContent = weatherInfo.location;
 		region.textContent = weatherInfo.region;
@@ -66,6 +65,15 @@ export default async function ui() {
 				: `${weatherInfo.currentWeather[0].currentTemp}°C`;
 		condition.textContent = weatherInfo.currentWeather[0].condition;
 		conditionImg.src = weatherInfo.currentWeather[0].conditionImgSrc;
+
+		const currentContainer = document.querySelector('#current');
+		const localTime = weatherInfo.currentWeather[0].localTime;
+
+		if (localTime >= 6 && localTime < 18) {
+			currentContainer.className = 'day';
+		} else {
+			currentContainer.className = 'night';
+		}
 
 		currentWeatherContainer.append(
 			location,

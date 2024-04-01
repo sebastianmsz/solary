@@ -163,29 +163,39 @@ img {
 #current {
 	display: flex;
 	flex-direction: column;
-	background-color: #2a2a2a;
 	border-radius: 0.5rem;
 	padding: 20px;
 	gap: 10px;
 	justify-content: center;
 	color: hsl(0, 0%, 100%);
 	text-align: center;
+	height: 100%;
+	width: 100%;
+	align-items: center;
 }
 #current h2 {
 	font-size: 2rem;
 }
 #current button {
-	background-color: #00000081;
-	color: #fff;
-	border: 1px solid #fff;
+	background-color: #00000079;
+	color: white;
+	border: none;
 	border-radius: 0.5rem;
 	padding: 0.5rem;
+	position: absolute;
+	top: 30px;
+	left: 350px;
 }
 #currentWeather {
+	background-color: #00000079;
+	padding: 20px;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	align-items: center;
+	border-radius: 0.5rem;
+	margin: 20px;
+	width: 500px;
 }
 #completionsContainer {
 	display: flex;
@@ -211,22 +221,27 @@ img {
 }
 
 #searchBarContainer {
-	left: 20px;
-	top: 20px;
-	width: 100%;
+	left: 30px;
+	top: 30px;
 	width: 20vw;
 	position: absolute;
 }
 #searchBarContainer input {
+	border: none;
 	width: 100%;
 	padding: 0.5rem;
 	border-radius: 0.5rem;
-	border: none;
 }
 #changeTemperatureUnit {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+#current.day {
+	background-image: url('../public/img/day.png');
+}
+#current.night {
+	background-image: url('../public/img/night.png');
 }
 /*current weather*/
 
@@ -270,6 +285,16 @@ img {
 	justify-content: center;
 }
 /*forecast*/
+
+/*scrollbar*/
+::-webkit-scrollbar {
+	width: 6px;
+}
+::-webkit-scrollbar-thumb {
+	background-color: #b8b8b8;
+	border-radius: 10px;
+}
+/*scrollbar*/
 
 /*footer*/
 footer {

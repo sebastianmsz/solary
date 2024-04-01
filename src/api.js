@@ -40,6 +40,7 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 		let wind = weatherInfo.current.wind_kph;
 		let sunrise = weatherInfo.forecast.forecastday[0].astro.sunrise;
 		let sunset = weatherInfo.forecast.forecastday[0].astro.sunset;
+		let localTime = new Date(weatherInfo.location.localtime).getHours();
 
 		sunrise = timeTo24Hour(sunrise);
 		sunset = timeTo24Hour(sunset);
@@ -52,12 +53,12 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 			wind,
 			sunrise,
 			sunset,
+			localTime,
 		});
 
 		//today forecast
-		let currentHour = new Date().getHours();
 		for (let i = 0; i < 10; i++) {
-			let time = currentHour + i;
+			let time = localTime + i;
 			if (time > 23) {
 				time = time - 24;
 			}
