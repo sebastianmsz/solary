@@ -1,3 +1,6 @@
+import '@fortawesome/fontawesome-free/js/fontawesome';
+import '@fortawesome/fontawesome-free/js/brands';
+
 const AUTH_KEY = '2a5eb57601d6487a8e9194349242603';
 export { getFormattedWeatherInfo, autocomplete };
 async function getWeatherInfo(location) {
@@ -32,13 +35,19 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 				? weatherInfo.current.temp_f
 				: weatherInfo.current.temp_c;
 		let condition = weatherInfo.current.condition.text;
+		let conditionImgSrc = weatherInfo.current.condition.icon;
 		let humidity = weatherInfo.current.humidity;
-		let wind = weatherInfo.current.wind_mph;
+		let wind = weatherInfo.current.wind_kph;
 		let sunrise = weatherInfo.forecast.forecastday[0].astro.sunrise;
 		let sunset = weatherInfo.forecast.forecastday[0].astro.sunset;
+
+		sunrise = timeTo24Hour(sunrise);
+		sunset = timeTo24Hour(sunset);
+
 		currentWeather.push({
 			currentTemp,
 			condition,
+			conditionImgSrc,
 			humidity,
 			wind,
 			sunrise,
@@ -48,14 +57,19 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 		//today forecast
 		let currentHour = new Date().getHours();
 		for (let i = 0; i < 10; i++) {
-			let time = (currentHour + i) % 24;
+			let time = currentHour + i;
+			if (time > 23) {
+				time = time - 24;
+			}
 			let temp =
 				tempUnit === 'f'
-					? weatherInfo.forecast.forecastday[0].hour[i].temp_f
-					: weatherInfo.forecast.forecastday[0].hour[i].temp_c;
-			let condition =
-				weatherInfo.forecast.forecastday[0].hour[i].condition.text;
-			todayForecast.push({ time, temp, condition });
+					? weatherInfo.forecast.forecastday[0].hour[time].temp_f
+					: weatherInfo.forecast.forecastday[0].hour[time].temp_c;
+			let conditionImgSrc =
+				weatherInfo.forecast.forecastday[0].hour[time].condition.icon;
+			time = time < 10 ? `0${time}:00` : `${time}:00`;
+
+			todayForecast.push({ time, temp, conditionImgSrc });
 		}
 
 		//future forecast
@@ -72,9 +86,14 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 				tempUnit === 'f'
 					? weatherInfo.forecast.forecastday[i].day.mintemp_f
 					: weatherInfo.forecast.forecastday[i].day.mintemp_c;
-			let condition =
-				weatherInfo.forecast.forecastday[i].day.condition.text;
-			futureForecast.push({ dayOfWeek, maxTemp, minTemp, condition });
+			let conditionImgSrc =
+				weatherInfo.forecast.forecastday[i].day.condition.icon;
+			futureForecast.push({
+				dayOfWeek,
+				maxTemp,
+				minTemp,
+				conditionImgSrc,
+			});
 		}
 
 		let formattedWeatherInfo = {
@@ -84,11 +103,23 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 			todayForecast: todayForecast,
 			futureForecast: futureForecast,
 		};
+
 		return formattedWeatherInfo;
 	} catch (error) {
 		console.error('Error fetching weather data:', error);
 		return null;
 	}
+}
+
+function timeTo24Hour(time) {
+	let [hours, minutes, period] = time.split(/[:\s]/);
+	if (period === 'PM' && hours !== '12') {
+		hours = parseInt(hours) + 12;
+	}
+	if (period === 'AM' && hours === '12') {
+		hours = '00';
+	}
+	return `${hours}:${minutes}`;
 }
 
 async function autocomplete(input) {

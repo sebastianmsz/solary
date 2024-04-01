@@ -35,7 +35,7 @@ export default async function ui() {
 					const completionDiv = document.createElement('div');
 					completionDiv.textContent = `${completion.name}, ${completion.region}`;
 					completionDiv.addEventListener('click', () => {
-						input.value = completion.name;
+						input.value = '';
 						completionsContainer.innerHTML = '';
 						updateWeatherInfo(completion.name);
 					});
@@ -52,13 +52,10 @@ export default async function ui() {
 			document.querySelector('#currentWeather');
 		currentWeatherContainer.innerHTML = '';
 		const location = document.createElement('h2');
-		const region = document.createElement('h3');
-		const currentTemp = document.createElement('h3');
-		const condition = document.createElement('h3');
-		const humidity = document.createElement('h3');
-		const wind = document.createElement('h3');
-		const sunrise = document.createElement('h3');
-		const sunset = document.createElement('h3');
+		const region = document.createElement('p');
+		const currentTemp = document.createElement('p');
+		const condition = document.createElement('p');
+		const conditionImg = document.createElement('img');
 
 		location.setAttribute('id', 'location');
 		location.textContent = weatherInfo.location;
@@ -68,20 +65,14 @@ export default async function ui() {
 				? `${weatherInfo.currentWeather[0].currentTemp}°F`
 				: `${weatherInfo.currentWeather[0].currentTemp}°C`;
 		condition.textContent = weatherInfo.currentWeather[0].condition;
-		humidity.textContent = weatherInfo.currentWeather[0].humidity;
-		wind.textContent = weatherInfo.currentWeather[0].wind;
-		sunrise.textContent = weatherInfo.currentWeather[0].sunrise;
-		sunset.textContent = weatherInfo.currentWeather[0].sunset;
+		conditionImg.src = weatherInfo.currentWeather[0].conditionImgSrc;
 
 		currentWeatherContainer.append(
 			location,
 			region,
 			currentTemp,
+			conditionImg,
 			condition,
-			humidity,
-			wind,
-			sunrise,
-			sunset,
 		);
 	}
 
@@ -90,16 +81,71 @@ export default async function ui() {
 		todayForecastContainer.innerHTML = '';
 		weatherInfo.todayForecast.forEach((hour) => {
 			const hourContainer = document.createElement('div');
-			const time = document.createElement('h3');
-			const temp = document.createElement('h3');
-			const condition = document.createElement('h3');
+			const time = document.createElement('p');
+			const temp = document.createElement('p');
+			const conditionImg = document.createElement('img');
 			time.textContent = hour.time;
 			temp.textContent =
 				currentUnit === 'f' ? `${hour.temp}°F` : `${hour.temp}°C`;
-			condition.textContent = hour.condition;
-			hourContainer.append(time, temp, condition);
+			conditionImg.src = hour.conditionImgSrc;
+			hourContainer.append(time, temp, conditionImg);
 			todayForecastContainer.appendChild(hourContainer);
 		});
+	}
+
+	function renderTodayWeatherDetails(weatherInfo) {
+		const todayWeatherDetailsContainer = document.querySelector(
+			'#todayWeatherDetails',
+		);
+
+		todayWeatherDetailsContainer.innerHTML = '';
+
+		const humidityContainer = document.createElement('div');
+		const windContainer = document.createElement('div');
+		const sunriseContainer = document.createElement('div');
+		const sunsetContainer = document.createElement('div');
+
+		const humidityLabel = document.createElement('h2');
+		const windLabel = document.createElement('h2');
+		const sunriseLabel = document.createElement('h2');
+		const sunsetLabel = document.createElement('h2');
+
+		const humidityImg = document.createElement('img');
+		const windImg = document.createElement('img');
+		const sunriseImg = document.createElement('img');
+		const sunsetImg = document.createElement('img');
+
+		const humidity = document.createElement('p');
+		const wind = document.createElement('p');
+		const sunrise = document.createElement('p');
+		const sunset = document.createElement('p');
+
+		humidityImg.src = '/public/img/humidity.svg';
+		windImg.src = '/public/img/wind.svg';
+		sunriseImg.src = '/public/img/sunrise.svg';
+		sunsetImg.src = '/public/img/sunset.svg';
+
+		humidityLabel.textContent = 'Humidity';
+		windLabel.textContent = 'Wind';
+		sunriseLabel.textContent = 'Sunrise';
+		sunsetLabel.textContent = 'Sunset';
+
+		humidity.textContent = `${weatherInfo.currentWeather[0].humidity}%`;
+		wind.textContent = `${weatherInfo.currentWeather[0].wind} KPH`;
+		sunrise.textContent = weatherInfo.currentWeather[0].sunrise;
+		sunset.textContent = weatherInfo.currentWeather[0].sunset;
+
+		humidityContainer.append(humidityLabel, humidityImg, humidity);
+		windContainer.append(windLabel, windImg, wind);
+		sunriseContainer.append(sunriseLabel, sunriseImg, sunrise);
+		sunsetContainer.append(sunsetLabel, sunsetImg, sunset);
+
+		todayWeatherDetailsContainer.append(
+			humidityContainer,
+			windContainer,
+			sunriseContainer,
+			sunsetContainer,
+		);
 	}
 
 	function renderFutureForecast(weatherInfo) {
@@ -108,17 +154,17 @@ export default async function ui() {
 		futureForecastContainer.innerHTML = '';
 		weatherInfo.futureForecast.forEach((day) => {
 			const dayContainer = document.createElement('div');
-			const dayOfWeek = document.createElement('h3');
-			const maxTemp = document.createElement('h3');
-			const minTemp = document.createElement('h3');
-			const condition = document.createElement('h3');
+			const dayOfWeek = document.createElement('p');
+			const maxTemp = document.createElement('p');
+			const minTemp = document.createElement('p');
+			const conditionImg = document.createElement('img');
 			dayOfWeek.textContent = day.dayOfWeek;
 			maxTemp.textContent =
 				currentUnit === 'f' ? `${day.maxTemp}°F` : `${day.maxTemp}°C`;
 			minTemp.textContent =
 				currentUnit === 'f' ? `${day.minTemp}°F` : `${day.minTemp}°C`;
-			condition.textContent = day.condition;
-			dayContainer.append(dayOfWeek, maxTemp, minTemp, condition);
+			conditionImg.src = day.conditionImgSrc;
+			dayContainer.append(dayOfWeek, maxTemp, minTemp, conditionImg);
 			futureForecastContainer.appendChild(dayContainer);
 		});
 	}
@@ -128,6 +174,7 @@ export default async function ui() {
 			const unit = currentUnit;
 			const weatherInfo = await getFormattedWeatherInfo(city, unit);
 			renderCurrentWeather(weatherInfo);
+			renderTodayWeatherDetails(weatherInfo);
 			renderTodayForecast(weatherInfo);
 			renderFutureForecast(weatherInfo);
 			renderTempUnitButton(unit);
@@ -158,5 +205,19 @@ export default async function ui() {
 		updateWeatherInfo(location, newUnit);
 	}
 
+	function createFooter() {
+		const footer = document.querySelector('footer');
+		const copyrightParagraph = document.createElement('p');
+		copyrightParagraph.innerHTML = `Copyright &copy;<span id='year'>${new Date().getFullYear()}</span> sebastianmsz`;
+		const githubLink = document.createElement('a');
+		githubLink.href = 'https://github.com/sebastianmsz';
+		githubLink.target = '_blank';
+		githubLink.innerHTML =
+			'<i class="fa-brands fa-github" aria-hidden="true"></i>';
+		copyrightParagraph.appendChild(githubLink);
+		footer.appendChild(copyrightParagraph);
+	}
+
+	createFooter();
 	updateWeatherInfo('London', 'c');
 }
