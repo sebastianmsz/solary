@@ -14,6 +14,16 @@ export default async function ui() {
 		input.setAttribute('id', 'location-input');
 
 		input.addEventListener('input', handleInput);
+		document.addEventListener('click', (e) => {
+			if (
+				e.target !== input &&
+				e.target !== completionsContainer &&
+				!completionsContainer.contains(e.target)
+			) {
+				completionsContainer.innerHTML = '';
+			}
+		});
+		input.addEventListener('focus', handleInput);
 
 		searchBarContainer.append(input, completionsContainer);
 	}
@@ -28,6 +38,8 @@ export default async function ui() {
 			if (input.value.length < 3) {
 				completionsContainer.innerHTML = '';
 				return;
+			} else if (input.value.length === 0) {
+				completionsContainer.innerHTML = '';
 			} else {
 				const completions = await autocomplete(input.value);
 				completionsContainer.innerHTML = '';
@@ -89,7 +101,7 @@ export default async function ui() {
 		todayForecastContainer.innerHTML = '';
 		weatherInfo.todayForecast.forEach((hour) => {
 			const hourContainer = document.createElement('div');
-			const time = document.createElement('p');
+			const time = document.createElement('h2');
 			const temp = document.createElement('p');
 			const conditionImg = document.createElement('img');
 			time.textContent = hour.time;
@@ -162,7 +174,7 @@ export default async function ui() {
 		futureForecastContainer.innerHTML = '';
 		weatherInfo.futureForecast.forEach((day) => {
 			const dayContainer = document.createElement('div');
-			const dayOfWeek = document.createElement('p');
+			const dayOfWeek = document.createElement('h2');
 			const maxTemp = document.createElement('p');
 			const minTemp = document.createElement('p');
 			const conditionImg = document.createElement('img');
@@ -198,8 +210,7 @@ export default async function ui() {
 			'#changeTemperatureUnit',
 		);
 		changeTemperatureUnitBtn.textContent =
-			unit === 'f' ? 'Change to Celsius' : 'Change to Fahrenheit';
-
+			unit === 'f' ? 'Celsius °C' : 'Fahrenheit °F';
 		changeTemperatureUnitBtn.addEventListener(
 			'click',
 			tempUnitButtonClickHandler,
