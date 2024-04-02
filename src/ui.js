@@ -1,4 +1,8 @@
 import { getFormattedWeatherInfo, autocomplete } from './api.js';
+import humidityImg from '../public/img/humidity.svg';
+import windImg from '../public/img/wind.svg';
+import sunriseImg from '../public/img/sunrise.svg';
+import sunsetImg from '../public/img/sunset.svg';
 
 export default async function ui() {
 	function renderSearchBar() {
@@ -130,20 +134,20 @@ export default async function ui() {
 		const sunriseLabel = document.createElement('h2');
 		const sunsetLabel = document.createElement('h2');
 
-		const humidityImg = document.createElement('img');
-		const windImg = document.createElement('img');
-		const sunriseImg = document.createElement('img');
-		const sunsetImg = document.createElement('img');
+		const humidityImgElement = document.createElement('img');
+		const windImgElement = document.createElement('img');
+		const sunriseImgElement = document.createElement('img');
+		const sunsetImgElement = document.createElement('img');
+
+		humidityImgElement.src = humidityImg;
+		windImgElement.src = windImg;
+		sunriseImgElement.src = sunriseImg;
+		sunsetImgElement.src = sunsetImg;
 
 		const humidity = document.createElement('p');
 		const wind = document.createElement('p');
 		const sunrise = document.createElement('p');
 		const sunset = document.createElement('p');
-
-		humidityImg.src = '/public/img/humidity.svg';
-		windImg.src = '/public/img/wind.svg';
-		sunriseImg.src = '/public/img/sunrise.svg';
-		sunsetImg.src = '/public/img/sunset.svg';
 
 		humidityLabel.textContent = 'Humidity';
 		windLabel.textContent = 'Wind';
@@ -155,10 +159,10 @@ export default async function ui() {
 		sunrise.textContent = weatherInfo.currentWeather[0].sunrise;
 		sunset.textContent = weatherInfo.currentWeather[0].sunset;
 
-		humidityContainer.append(humidityLabel, humidityImg, humidity);
-		windContainer.append(windLabel, windImg, wind);
-		sunriseContainer.append(sunriseLabel, sunriseImg, sunrise);
-		sunsetContainer.append(sunsetLabel, sunsetImg, sunset);
+		humidityContainer.append(humidityLabel, humidityImgElement, humidity);
+		windContainer.append(windLabel, windImgElement, wind);
+		sunriseContainer.append(sunriseLabel, sunriseImgElement, sunrise);
+		sunsetContainer.append(sunsetLabel, sunsetImgElement, sunset);
 
 		todayWeatherDetailsContainer.append(
 			humidityContainer,
