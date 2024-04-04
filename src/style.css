@@ -337,29 +337,30 @@ footer {
 }
 /*footer*/
 /*mobile*/
-@media (max-width: 600px) {
+
+@media only screen and (max-width: 600px) {
 	body {
 		overflow-x: hidden;
 		background-color: var(--gray);
-		padding-bottom: 50px;
-		min-width: 0;
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 	}
 	#current {
-		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		height: fit-content;
 		padding-top: 60px;
-		min-width: 0;
+		width: calc(100% - 40px);
 	}
 	#currentWeather {
-		min-width: 0;
-
-		width: 100%;
+		width: 60vw;
 	}
 	#forecast {
-		position: static;
-		padding-bottom: 49px;
+		width: 100%;
+		height: fit-content;
+		padding-bottom: 50px;
 	}
 	#current h2 {
 		font-size: 1.5rem;
