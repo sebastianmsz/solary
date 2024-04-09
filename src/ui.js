@@ -178,17 +178,22 @@ export default async function ui() {
 		futureForecastContainer.innerHTML = '';
 		weatherInfo.futureForecast.forEach((day) => {
 			const dayContainer = document.createElement('div');
-			const dayOfWeek = document.createElement('h2');
+			const dayOfWeekContainer = document.createElement('h2');
 			const maxTemp = document.createElement('p');
 			const minTemp = document.createElement('p');
 			const conditionImg = document.createElement('img');
-			dayOfWeek.textContent = day.dayOfWeek;
+			dayOfWeekContainer.textContent = day.dayOfWeek;
 			maxTemp.textContent =
 				currentUnit === 'f' ? `${day.maxTemp}°F` : `${day.maxTemp}°C`;
 			minTemp.textContent =
 				currentUnit === 'f' ? `${day.minTemp}°F` : `${day.minTemp}°C`;
 			conditionImg.src = day.conditionImgSrc;
-			dayContainer.append(dayOfWeek, maxTemp, minTemp, conditionImg);
+			dayContainer.append(
+				dayOfWeekContainer,
+				maxTemp,
+				minTemp,
+				conditionImg,
+			);
 			futureForecastContainer.appendChild(dayContainer);
 		});
 	}

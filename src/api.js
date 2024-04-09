@@ -1,6 +1,5 @@
 import '@fortawesome/fontawesome-free/js/fontawesome';
 import '@fortawesome/fontawesome-free/js/brands';
-
 const AUTH_KEY = '2a5eb57601d6487a8e9194349242603';
 export { getFormattedWeatherInfo, autocomplete };
 async function getWeatherInfo(location) {
@@ -74,28 +73,27 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 		}
 
 		//future forecast
-		for (let i = 1; i < 6; i++) {
-			let date = weatherInfo.forecast.forecastday[i].date;
-			let dayOfWeek = new Date(date).toLocaleDateString('en-US', {
-				weekday: 'long',
-			});
+		const futureForecastDays = weatherInfo.forecast.forecastday;
+		console.log(futureForecastDays);
+		futureForecastDays.forEach((day) => {
+			let date = day.date.split('-');
+			let dayOfWeek = new Date(
+				date[0],
+				date[1] - 1,
+				date[2],
+			).toLocaleString('en-us', { weekday: 'long' });
 			let maxTemp =
-				tempUnit === 'f'
-					? weatherInfo.forecast.forecastday[i].day.maxtemp_f
-					: weatherInfo.forecast.forecastday[i].day.maxtemp_c;
+				tempUnit === 'f' ? day.day.maxtemp_f : day.day.maxtemp_c;
 			let minTemp =
-				tempUnit === 'f'
-					? weatherInfo.forecast.forecastday[i].day.mintemp_f
-					: weatherInfo.forecast.forecastday[i].day.mintemp_c;
-			let conditionImgSrc =
-				weatherInfo.forecast.forecastday[i].day.condition.icon;
+				tempUnit === 'f' ? day.day.mintemp_f : day.day.mintemp_c;
+			let conditionImgSrc = day.day.condition.icon;
 			futureForecast.push({
 				dayOfWeek,
 				maxTemp,
 				minTemp,
 				conditionImgSrc,
 			});
-		}
+		});
 
 		let formattedWeatherInfo = {
 			location: weatherInfo.location.name,
