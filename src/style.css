@@ -140,8 +140,14 @@ table {
 }
 body {
 	display: grid;
-	height: 100vh;
-	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	min-height: 100vh;
+	grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+	overflow: hidden; /* Prevent body scroll */
+}
+@media only screen and (max-width: 900px) {
+    body {
+        grid-template-columns: 1fr;
+    }
 }
 button {
 	transition: filter 60ms linear;
@@ -169,7 +175,10 @@ img {
 	height: 100%;
 	width: 100%;
 	align-items: center;
-	position: relative;
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	overflow: hidden;
 	box-sizing: border-box;
 }
 #current h2 {
@@ -196,15 +205,30 @@ img {
 }
 #currentWeather {
 	background-color: var(--transparent-black);
-	padding: 20px;
+	padding: 30px;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 15px;
 	align-items: center;
-	border-radius: 0.5rem;
+	border-radius: 1rem;
 	margin: 20px;
 	width: 100%;
 	text-align: center;
+	backdrop-filter: blur(8px);
+}
+#currentWeather h2 {
+	font-size: 2.5rem;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+#currentWeather p {
+	font-size: 1.2rem;
+	margin: 5px 0;
+}
+#currentWeather p:nth-child(3) {
+	font-size: 2rem;
+	font-weight: bold;
+	font-family: 'Poppins', var(--system-ui);
 }
 #completionsContainer {
 	display: flex;
@@ -248,52 +272,95 @@ img {
 }
 #current.day {
 	background-image: url('../public/img/day.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 #current.night {
 	background-image: url('../public/img/night.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 /*current weather*/
 
 /*forecast*/
 #forecast {
-	display: grid;
-	grid-template-rows: 1fr 1fr 1fr;
-	height: 100%;
-	width: 100%;
-	position: relative;
-	padding-bottom: 50px;
-	background-color: var(--gray);
+    background-color: var(--gray);
+    padding-bottom: 50px;
+	height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
+#forecast h3 {
+    color: var(--white);
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 20px;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    background-color: var(--dark-gray);
+    text-align: center;
+    border-bottom: 3px solid var(--black);
+}
+
 #forecast > div {
-	display: flex;
-	align-items: center;
-	padding: 20px;
-	gap: 15px;
-	overflow: hidden;
-	overflow-x: auto;
-	color: var(--white);
-	background-color: var(--gray);
+    display: flex;
+    align-items: center;
+    padding: 25px;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    color: var(--white);
+    background-color: var(--gray);
+    scroll-behavior: smooth;
 }
+
 #forecast h2 {
-	font-size: 1.2rem;
-	font-weight: bold;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
+
 #forecast > div > div {
-	background-color: var(--transparent-black);
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	min-width: 120px;
-	min-height: 100px;
-	text-align: center;
-	gap: 8px;
-	border-radius: 0.5rem;
-	padding: 10px;
-	margin: auto;
+    background-color: var(--transparent-black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 140px;
+    min-height: 120px;
+    text-align: center;
+    gap: 10px;
+    border-radius: 1rem;
+    padding: 15px;
+    margin: auto;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
 }
-#forecast #todayForecast {
-	background-color: var(--dark-gray);
+
+#forecast > div > div:hover {
+    transform: translateY(-5px);
+    background-color: hsla(0, 0%, 0%, 0.7);
+}
+
+#todayWeatherDetails {
+    justify-content: space-evenly !important;
+    flex-wrap: wrap;
+}
+
+#todayWeatherDetails > div {
+    flex: 1;
+    min-width: 200px !important;
+}
+
+#futureForecast div > div {
+    background: transparent !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    padding: 0 !important;
 }
 /*forecast*/
 
@@ -337,6 +404,7 @@ footer {
 @media only screen and (max-width: 600px) {
 	body {
 		overflow-x: hidden;
+		overflow-y: auto; /* Allow vertical scroll on mobile */
 		background-color: var(--gray);
 		display: flex;
 		flex-direction: column;
@@ -346,17 +414,25 @@ footer {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		height: fit-content;
-		padding-top: 60px;
+		min-height: 100vh;
+		padding: 80px 20px 20px;
 		width: 100%;
+		position: relative;
+		background-size: cover;
+		background-position: center;
 	}
 	#currentWeather {
-		width: 60vw;
+		width: 90%;
+		max-width: 400px;
+		padding: 25px;
+		margin: 0;
 	}
 	#forecast {
 		width: 100%;
 		height: fit-content;
 		padding-bottom: 35px;
+		height: auto;
+		overflow: visible;
 	}
 	#current h2 {
 		font-size: 1.5rem;
@@ -366,10 +442,14 @@ footer {
 	}
 	#current button,
 	#searchBarContainer input {
-		width: 30vw;
+		width: 120px;
 	}
-	#current button,
 	#searchBarContainer {
+		left: 20px;
+		top: 20px;
+	}
+	#current button {
+		right: 20px;
 		top: 20px;
 	}
 	footer {
@@ -377,5 +457,124 @@ footer {
 		font-size: 0.9rem;
 		height: 35px;
 	}
+	#forecast h3 {
+		font-size: 1.3rem;
+		padding: 15px;
+		text-align: left;
+	}
+	#forecast > div {
+		padding: 15px;
+		gap: 10px;
+	}
+	#forecast > div > div {
+		min-width: 120px;
+		min-height: 100px;
+		padding: 12px;
+	}
+	#todayWeatherDetails > div {
+		min-width: 140px !important;
+	}
+	#currentWeather h2 {
+		font-size: 3.5rem;
+	}
+	#currentWeather p {
+		font-size: 1.1rem;
+	}
+	#currentWeather p:nth-child(3) {
+		font-size: 2.2rem;
+	}
+	#currentWeather img {
+		width: 90px;
+		height: 90px;
+	}
+	#completionsContainer {
+		max-width: 250px;
+	}
+}
+
+@media only screen and (max-width: 400px) {
+	#currentWeather {
+		width: 95%;
+		padding: 20px;
+	}
+	#currentWeather h2 {
+		font-size: 2.8rem;
+	}
+	#currentWeather p:nth-child(3) {
+		font-size: 1.8rem;
+	}
+	#current button,
+	#searchBarContainer input {
+		width: 100px;
+		font-size: 0.9rem;
+	}
+}
+
+@media only screen and (max-width: 360px) {
+    #current {
+        padding-top: 70px;
+    }
+
+    #searchBarContainer {
+        left: 10px;
+        top: 15px;
+    }
+
+    #current button {
+        right: 10px;
+        top: 15px;
+    }
+
+    #current button,
+    #searchBarContainer input {
+        width: 90px;
+        height: 35px;
+        font-size: 0.85rem;
+    }
+
+    #completionsContainer {
+        max-width: 200px;
+        font-size: 0.9rem;
+    }
+
+    #currentWeather {
+        gap: 10px;
+    }
+
+    #currentWeather h2 {
+        font-size: 1.6rem;
+    }
+
+    #currentWeather p {
+        font-size: 1rem;
+    }
+
+    #currentWeather p:nth-child(3) {
+        font-size: 2.5rem;
+    }
+}
+
+@media only screen and (min-width: 601px) and (max-width: 900px) {
+    #current {
+        min-height: 50vh;
+    }
+
+    #currentWeather {
+        max-width: 500px;
+    }
+
+    #current button,
+    #searchBarContainer input {
+        width: 150px;
+    }
+
+    #completionsContainer {
+        max-width: 300px;
+    }
+
+    #forecast {
+        height: auto;
+        min-height: 50vh;
+    }
 }
 /*mobile*/

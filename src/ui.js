@@ -103,15 +103,17 @@ export default async function ui() {
 	function renderTodayForecast(weatherInfo) {
 		const todayForecastContainer = document.querySelector('#todayForecast');
 		todayForecastContainer.innerHTML = '';
+		
 		weatherInfo.todayForecast.forEach((hour) => {
 			const hourContainer = document.createElement('div');
 			const time = document.createElement('h2');
 			const temp = document.createElement('p');
 			const conditionImg = document.createElement('img');
+			
 			time.textContent = hour.time;
-			temp.textContent =
-				currentUnit === 'f' ? `${hour.temp}°F` : `${hour.temp}°C`;
+			temp.textContent = currentUnit === 'f' ? `${Math.round(hour.temp)}°F` : `${Math.round(hour.temp)}°C`;
 			conditionImg.src = hour.conditionImgSrc;
+			
 			hourContainer.append(time, temp, conditionImg);
 			todayForecastContainer.appendChild(hourContainer);
 		});
@@ -121,79 +123,78 @@ export default async function ui() {
 		const todayWeatherDetailsContainer = document.querySelector(
 			'#todayWeatherDetails',
 		);
-
 		todayWeatherDetailsContainer.innerHTML = '';
 
-		const humidityContainer = document.createElement('div');
-		const windContainer = document.createElement('div');
-		const sunriseContainer = document.createElement('div');
-		const sunsetContainer = document.createElement('div');
+		const details = [
+			{
+				label: 'Humidity',
+				value: `${weatherInfo.currentWeather[0].humidity}%`,
+				icon: humidityImg,
+				unit: ''
+			},
+			{
+				label: 'Wind Speed',
+				value: weatherInfo.currentWeather[0].wind,
+				icon: windImg,
+				unit: 'KPH'
+			},
+			{
+				label: 'Sunrise',
+				value: weatherInfo.currentWeather[0].sunrise,
+				icon: sunriseImg,
+				unit: ''
+			},
+			{
+				label: 'Sunset',
+				value: weatherInfo.currentWeather[0].sunset,
+				icon: sunsetImg,
+				unit: ''
+			}
+		];
 
-		const humidityLabel = document.createElement('h2');
-		const windLabel = document.createElement('h2');
-		const sunriseLabel = document.createElement('h2');
-		const sunsetLabel = document.createElement('h2');
+		details.forEach(detail => {
+			const container = document.createElement('div');
+			const label = document.createElement('h2');
+			const imgElement = document.createElement('img');
+			const value = document.createElement('p');
 
-		const humidityImgElement = document.createElement('img');
-		const windImgElement = document.createElement('img');
-		const sunriseImgElement = document.createElement('img');
-		const sunsetImgElement = document.createElement('img');
-
-		humidityImgElement.src = humidityImg;
-		windImgElement.src = windImg;
-		sunriseImgElement.src = sunriseImg;
-		sunsetImgElement.src = sunsetImg;
-
-		const humidity = document.createElement('p');
-		const wind = document.createElement('p');
-		const sunrise = document.createElement('p');
-		const sunset = document.createElement('p');
-
-		humidityLabel.textContent = 'Humidity';
-		windLabel.textContent = 'Wind';
-		sunriseLabel.textContent = 'Sunrise';
-		sunsetLabel.textContent = 'Sunset';
-
-		humidity.textContent = `${weatherInfo.currentWeather[0].humidity}%`;
-		wind.textContent = `${weatherInfo.currentWeather[0].wind} KPH`;
-		sunrise.textContent = weatherInfo.currentWeather[0].sunrise;
-		sunset.textContent = weatherInfo.currentWeather[0].sunset;
-
-		humidityContainer.append(humidityLabel, humidityImgElement, humidity);
-		windContainer.append(windLabel, windImgElement, wind);
-		sunriseContainer.append(sunriseLabel, sunriseImgElement, sunrise);
-		sunsetContainer.append(sunsetLabel, sunsetImgElement, sunset);
-
-		todayWeatherDetailsContainer.append(
-			humidityContainer,
-			windContainer,
-			sunriseContainer,
-			sunsetContainer,
-		);
+			label.textContent = detail.label;
+			imgElement.src = detail.icon;
+			value.textContent = `${detail.value}${detail.unit ? ' ' + detail.unit : ''}`;
+			
+			container.append(label, imgElement, value);
+			todayWeatherDetailsContainer.appendChild(container);
+		});
 	}
 
 	function renderFutureForecast(weatherInfo) {
 		const futureForecastContainer =
 			document.querySelector('#futureForecast');
 		futureForecastContainer.innerHTML = '';
+		
 		weatherInfo.futureForecast.forEach((day) => {
 			const dayContainer = document.createElement('div');
 			const dayOfWeekContainer = document.createElement('h2');
+			const tempContainer = document.createElement('div');
 			const maxTemp = document.createElement('p');
 			const minTemp = document.createElement('p');
 			const conditionImg = document.createElement('img');
+			
 			dayOfWeekContainer.textContent = day.dayOfWeek;
-			maxTemp.textContent =
-				currentUnit === 'f' ? `${day.maxTemp}°F` : `${day.maxTemp}°C`;
-			minTemp.textContent =
-				currentUnit === 'f' ? `${day.minTemp}°F` : `${day.minTemp}°C`;
+			maxTemp.textContent = currentUnit === 'f' 
+				? `${Math.round(day.maxTemp)}°F` 
+				: `${Math.round(day.maxTemp)}°C`;
+			minTemp.textContent = currentUnit === 'f' 
+				? `${Math.round(day.minTemp)}°F` 
+				: `${Math.round(day.minTemp)}°C`;
+			minTemp.style.opacity = '0.7';
 			conditionImg.src = day.conditionImgSrc;
-			dayContainer.append(
-				dayOfWeekContainer,
-				maxTemp,
-				minTemp,
-				conditionImg,
-			);
+			
+			tempContainer.style.display = 'flex';
+			tempContainer.style.gap = '10px';
+			tempContainer.append(maxTemp, minTemp);
+			
+			dayContainer.append(dayOfWeekContainer, tempContainer, conditionImg);
 			futureForecastContainer.appendChild(dayContainer);
 		});
 	}

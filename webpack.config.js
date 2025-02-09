@@ -16,6 +16,13 @@ module.exports = {
 		path: path.resolve(__dirname, 'dist'),
 		clean: true,
 	},
+	devServer: {
+		static: './dist',
+		hot: true,
+		open: true,
+		port: 8080,
+		compress: true,
+	},
 	module: {
 		rules: [
 			{

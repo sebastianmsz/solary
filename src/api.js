@@ -28,7 +28,6 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 		let todayForecast = [];
 		let futureForecast = [];
 
-		//current weather
 		let currentTemp =
 			tempUnit === 'f'
 				? weatherInfo.current.temp_f
@@ -55,7 +54,6 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 			localTime,
 		});
 
-		//today forecast
 		for (let i = 0; i < 10; i++) {
 			let time = localTime + i;
 			if (time > 23) {
@@ -72,7 +70,6 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 			todayForecast.push({ time, temp, conditionImgSrc });
 		}
 
-		//future forecast
 		const futureForecastDays = weatherInfo.forecast.forecastday;
 		console.log(futureForecastDays);
 		futureForecastDays.forEach((day) => {
