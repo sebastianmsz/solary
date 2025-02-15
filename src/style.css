@@ -128,11 +128,11 @@ table {
 :root {
 	--system-ui: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
 		'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-	--transparent-black: hsla(0, 0%, 0%, 0.5);
+	--transparent-black: hsla(0, 0%, 0%, 0.305);
 	--white: hsl(0, 0%, 90%);
 	--black: hsl(0, 0%, 10%);
-	--gray: hsl(0, 0%, 40%);
-	--dark-gray: hsl(0, 0%, 20%);
+	--gray: hsl(0, 0%, 16%);
+	--dark-gray: hsl(0, 0%, 9%);
 }
 :root * {
 	box-sizing: border-box;
@@ -145,9 +145,15 @@ body {
 	overflow: hidden; /* Prevent body scroll */
 }
 @media only screen and (max-width: 900px) {
-    body {
-        grid-template-columns: 1fr;
-    }
+	body {
+		grid-template-columns: 1fr;
+		overflow-y: auto;
+	}
+}
+@media only screen and (max-width: 600px) {
+	body {
+		font-size: 14px;
+	}
 }
 button {
 	transition: filter 60ms linear;
@@ -170,7 +176,9 @@ img {
 /*current weather*/
 #current {
 	display: flex;
-	padding: 20px;
+	flex-direction: column;
+	gap: 50px;
+	padding: 100px;
 	color: var(--white);
 	height: 100%;
 	width: 100%;
@@ -181,9 +189,24 @@ img {
 	overflow: hidden;
 	box-sizing: border-box;
 }
+#current > img {
+	background: none;
+	border-radius: 0;
+	padding: 0;
+	margin: 0;
+	max-width: 300px;
+}
 #current h2 {
 	font-size: 2rem;
 	font-weight: bold;
+}
+#parametersContainer {
+	display: flex;
+	width: 100%;
+	gap: 10px;
+}
+#parametersContainer > * {
+	flex: 1;
 }
 #current button {
 	background-color: var(--transparent-black);
@@ -191,7 +214,6 @@ img {
 	border: none;
 	border-radius: 0.5rem;
 	padding: 0.5rem;
-	position: absolute;
 	top: 40px;
 	right: 40px;
 	height: 40px;
@@ -199,6 +221,18 @@ img {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+#searchBarContainer {
+	height: fit-content;
+	width: fit-content;
+	position: relative;
+}
+#searchBarContainer input {
+	border: none;
+	width: 100%;
+	height: 40px;
+	border-radius: 0.5rem;
+	padding: 0.5rem;
 }
 #current button:hover {
 	background-color: var(--black);
@@ -211,7 +245,6 @@ img {
 	gap: 15px;
 	align-items: center;
 	border-radius: 1rem;
-	margin: 20px;
 	width: 100%;
 	text-align: center;
 	backdrop-filter: blur(8px);
@@ -234,15 +267,17 @@ img {
 	display: flex;
 	flex-direction: column;
 	position: absolute;
-	top: calc(100% + 10px);
+	top: 100%;
 	left: 0;
 	right: 0;
 	background-color: var(--white);
 	border-radius: 0.5rem;
-	box-shadow: 0 0 0.5rem var(--black);
-	z-index: 10;
+	z-index: 100;
 	color: var(--black);
 	width: 100%;
+	margin-top: 5px;
+	max-height: 200px;
+	overflow-y: auto;
 }
 
 #completionsContainer div:hover {
@@ -255,112 +290,188 @@ img {
 	border-radius: 0.5rem;
 	padding: 0.5rem;
 }
-
-#searchBarContainer {
-	left: 40px;
-	top: 40px;
-	position: absolute;
-	height: fit-content;
-	width: fit-content;
-}
-#searchBarContainer input {
-	border: none;
-	width: 16vw;
-	height: 40px;
-	border-radius: 0.5rem;
-	padding: 0.5rem;
-}
 #current.day {
 	background-image: url('../public/img/day.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
 }
 #current.night {
 	background-image: url('../public/img/night.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+@media only screen and (max-width: 900px) {
+    #current {
+        padding: 40px 20px;
+        height: auto;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    #current > img {
+        max-width: 200px;
+    }
+
+    #parametersContainer {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #current button {
+        width: 100%;
+    }
+
+    #searchBarContainer {
+        width: 100%;
+    }
+
+    #searchBarContainer input {
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    #current {
+        padding: 20px 10px;
+        gap: 30px;
+    }
+
+    #current > img {
+        max-width: 150px;
+    }
+
+    #currentWeather h2 {
+        font-size: 2rem;
+    }
+
+    #currentWeather p:nth-child(3) {
+        font-size: 1.6rem;
+    }
 }
 /*current weather*/
 
 /*forecast*/
 #forecast {
-    background-color: var(--gray);
-    padding-bottom: 50px;
+	background-color: var(--gray);
+	padding-bottom: 50px;
 	height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 #forecast h3 {
-    color: var(--white);
-    font-size: 1.6rem;
-    font-weight: bold;
-    padding: 20px;
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    background-color: var(--dark-gray);
-    text-align: center;
-    border-bottom: 3px solid var(--black);
+	color: var(--white);
+	font-size: 1.6rem;
+	font-weight: bold;
+	padding: 20px;
+	margin: 0;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	background-color: var(--dark-gray);
+	text-align: center;
 }
 
 #forecast > div {
-    display: flex;
-    align-items: center;
-    padding: 25px;
-    gap: 20px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    color: var(--white);
-    background-color: var(--gray);
-    scroll-behavior: smooth;
+	display: flex;
+	align-items: center;
+	padding: 25px;
+	gap: 20px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	color: var(--white);
+	background-color: var(--gray);
+	scroll-behavior: smooth;
 }
 
 #forecast h2 {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 5px;
+	font-size: 1.3rem;
+	font-weight: bold;
+	margin-bottom: 5px;
 }
 
 #forecast > div > div {
-    background-color: var(--transparent-black);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-width: 140px;
-    min-height: 120px;
-    text-align: center;
-    gap: 10px;
-    border-radius: 1rem;
-    padding: 15px;
-    margin: auto;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    cursor: pointer;
+	background-color: var(--transparent-black);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	min-width: 140px;
+	min-height: 120px;
+	text-align: center;
+	gap: 10px;
+	border-radius: 1rem;
+	padding: 15px;
+	margin: auto;
+	transition:
+		transform 0.2s ease,
+		background-color 0.2s ease;
+	cursor: pointer;
 }
 
 #forecast > div > div:hover {
-    transform: translateY(-5px);
-    background-color: hsla(0, 0%, 0%, 0.7);
+	transform: translateY(-5px);
+	background-color: hsla(0, 0%, 0%, 0.7);
 }
 
 #todayWeatherDetails {
-    justify-content: space-evenly !important;
-    flex-wrap: wrap;
+	justify-content: space-evenly !important;
+	flex-wrap: wrap;
 }
 
 #todayWeatherDetails > div {
-    flex: 1;
-    min-width: 200px !important;
+	flex: 1;
+	min-width: 200px !important;
 }
 
 #futureForecast div > div {
-    background: transparent !important;
-    min-width: auto !important;
-    min-height: auto !important;
-    padding: 0 !important;
+	background: transparent !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	padding: 0 !important;
+}
+@media only screen and (max-width: 900px) {
+    #forecast {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #forecast h3 {
+        font-size: 1.4rem;
+        padding: 15px;
+    }
+
+    #forecast > div {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    #todayWeatherDetails > div {
+        min-width: 150px !important;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    #forecast h3 {
+        font-size: 1.2rem;
+        padding: 12px;
+    }
+
+    #forecast > div {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    #forecast > div > div {
+        min-width: 120px;
+        min-height: 100px;
+        padding: 10px;
+    }
+
+    #todayWeatherDetails > div {
+        min-width: 130px !important;
+    }
 }
 /*forecast*/
 
@@ -376,205 +487,65 @@ img {
 
 /*footer*/
 footer {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	height: 50px;
-	background-color: var(--black);
-	color: var(--white);
-	text-align: center;
-	line-height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: var(--black);
+    color: var(--white);
+    text-align: center;
+    padding: 0 20px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
+
+footer p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
 .fa-github {
-	font-size: 1.2rem;
-	color: var(--white);
-	transition: transform 0.3s ease-in-out;
-	margin-left: 6px;
+	margin-left: 10px;
+    font-size: 1.2rem;
+    color: var(--white);
+    transition: transform 0.3s ease;
 }
-.fa-github:hover {
-	transform: rotate(360deg) scale(1.2);
+
+footer a {
+    color: var(--white);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
-/*footer*/
-/*mobile*/
+
+footer a:hover .fa-github {
+    transform: rotate(360deg) scale(1.1);
+}
+
+footer a:focus {
+    outline: 2px solid var(--white);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
 
 @media only screen and (max-width: 600px) {
-	body {
-		overflow-x: hidden;
-		overflow-y: auto; /* Allow vertical scroll on mobile */
-		background-color: var(--gray);
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
-	#current {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 100vh;
-		padding: 80px 20px 20px;
-		width: 100%;
-		position: relative;
-		background-size: cover;
-		background-position: center;
-	}
-	#currentWeather {
-		width: 90%;
-		max-width: 400px;
-		padding: 25px;
-		margin: 0;
-	}
-	#forecast {
-		width: 100%;
-		height: fit-content;
-		padding-bottom: 35px;
-		height: auto;
-		overflow: visible;
-	}
-	#current h2 {
-		font-size: 1.5rem;
-	}
-	#forecast h2 {
-		font-size: 1.1rem;
-	}
-	#current button,
-	#searchBarContainer input {
-		width: 120px;
-	}
-	#searchBarContainer {
-		left: 20px;
-		top: 20px;
-	}
-	#current button {
-		right: 20px;
-		top: 20px;
-	}
-	footer {
-		padding: 10px;
-		font-size: 0.9rem;
-		height: 35px;
-	}
-	#forecast h3 {
-		font-size: 1.3rem;
-		padding: 15px;
-		text-align: left;
-	}
-	#forecast > div {
-		padding: 15px;
-		gap: 10px;
-	}
-	#forecast > div > div {
-		min-width: 120px;
-		min-height: 100px;
-		padding: 12px;
-	}
-	#todayWeatherDetails > div {
-		min-width: 140px !important;
-	}
-	#currentWeather h2 {
-		font-size: 3.5rem;
-	}
-	#currentWeather p {
-		font-size: 1.1rem;
-	}
-	#currentWeather p:nth-child(3) {
-		font-size: 2.2rem;
-	}
-	#currentWeather img {
-		width: 90px;
-		height: 90px;
-	}
-	#completionsContainer {
-		max-width: 250px;
-	}
-}
-
-@media only screen and (max-width: 400px) {
-	#currentWeather {
-		width: 95%;
-		padding: 20px;
-	}
-	#currentWeather h2 {
-		font-size: 2.8rem;
-	}
-	#currentWeather p:nth-child(3) {
-		font-size: 1.8rem;
-	}
-	#current button,
-	#searchBarContainer input {
-		width: 100px;
-		font-size: 0.9rem;
-	}
-}
-
-@media only screen and (max-width: 360px) {
-    #current {
-        padding-top: 70px;
+    footer {
+        height: 40px;
     }
-
-    #searchBarContainer {
-        left: 10px;
-        top: 15px;
+    
+    footer p {
+        font-size: 0.8rem;
     }
-
-    #current button {
-        right: 10px;
-        top: 15px;
-    }
-
-    #current button,
-    #searchBarContainer input {
-        width: 90px;
-        height: 35px;
-        font-size: 0.85rem;
-    }
-
-    #completionsContainer {
-        max-width: 200px;
-        font-size: 0.9rem;
-    }
-
-    #currentWeather {
-        gap: 10px;
-    }
-
-    #currentWeather h2 {
-        font-size: 1.6rem;
-    }
-
-    #currentWeather p {
+    
+    .fa-github {
         font-size: 1rem;
     }
-
-    #currentWeather p:nth-child(3) {
-        font-size: 2.5rem;
-    }
 }
-
-@media only screen and (min-width: 601px) and (max-width: 900px) {
-    #current {
-        min-height: 50vh;
-    }
-
-    #currentWeather {
-        max-width: 500px;
-    }
-
-    #current button,
-    #searchBarContainer input {
-        width: 150px;
-    }
-
-    #completionsContainer {
-        max-width: 300px;
-    }
-
-    #forecast {
-        height: auto;
-        min-height: 50vh;
-    }
-}
-/*mobile*/
+/*footer*/

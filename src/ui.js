@@ -3,8 +3,18 @@ import humidityImg from '../public/img/humidity.svg';
 import windImg from '../public/img/wind.svg';
 import sunriseImg from '../public/img/sunrise.svg';
 import sunsetImg from '../public/img/sunset.svg';
+import titleImg from '../public/img/title.svg';
 
 export default async function ui() {
+	let currentUnit = 'c';
+	let searchTimeout;
+
+	// Set the title image
+	const titleImage = document.querySelector('#current > img');
+	if (titleImage) {
+		titleImage.src = titleImg;
+	}
+
 	function renderSearchBar() {
 		const searchBarContainer = document.querySelector(
 			'#searchBarContainer',
@@ -17,21 +27,31 @@ export default async function ui() {
 		input.setAttribute('placeholder', 'Enter location');
 		input.setAttribute('id', 'location-input');
 
+		// Remove any existing event listeners from document
+		document.removeEventListener('click', handleClickOutside);
+
+		// Add event listeners
 		input.addEventListener('input', handleInput);
-		document.addEventListener('click', (e) => {
-			if (
-				e.target !== input &&
-				e.target !== completionsContainer &&
-				!completionsContainer.contains(e.target)
-			) {
-				completionsContainer.innerHTML = '';
-			}
-		});
 		input.addEventListener('focus', handleInput);
+		document.addEventListener('click', handleClickOutside);
 
 		searchBarContainer.append(input, completionsContainer);
 	}
 	renderSearchBar();
+
+	function handleClickOutside(e) {
+		const completionsContainer = document.querySelector(
+			'#completionsContainer',
+		);
+		const input = document.querySelector('#location-input');
+		if (
+			e.target !== input &&
+			e.target !== completionsContainer &&
+			!completionsContainer?.contains(e.target)
+		) {
+			completionsContainer.innerHTML = '';
+		}
+	}
 
 	async function handleInput() {
 		try {
@@ -39,27 +59,42 @@ export default async function ui() {
 				'#completionsContainer',
 			);
 			const input = document.querySelector('#location-input');
+
+			// Clear previous timeout
+			if (searchTimeout) {
+				clearTimeout(searchTimeout);
+			}
+
+			// Clear suggestions if input is too short
 			if (input.value.length < 3) {
 				completionsContainer.innerHTML = '';
 				return;
-			} else if (input.value.length === 0) {
-				completionsContainer.innerHTML = '';
-			} else {
-				const completions = await autocomplete(input.value);
-				completionsContainer.innerHTML = '';
-				completions.forEach((completion) => {
-					const completionDiv = document.createElement('div');
-					completionDiv.textContent = `${completion.name}, ${completion.region}`;
-					completionDiv.addEventListener('click', () => {
-						input.value = '';
-						completionsContainer.innerHTML = '';
-						updateWeatherInfo(completion.name);
-					});
-					completionsContainer.appendChild(completionDiv);
-				});
 			}
+
+			// Set new timeout to avoid too many API calls
+			searchTimeout = setTimeout(async () => {
+				try {
+					const completions = await autocomplete(input.value);
+					completionsContainer.innerHTML = '';
+
+					if (completions && completions.length > 0) {
+						completions.forEach((completion) => {
+							const completionDiv = document.createElement('div');
+							completionDiv.textContent = `${completion.name}, ${completion.region}`;
+							completionDiv.addEventListener('click', () => {
+								input.value = `${completion.name}, ${completion.region}`;
+								completionsContainer.innerHTML = '';
+								updateWeatherInfo(completion.name);
+							});
+							completionsContainer.appendChild(completionDiv);
+						});
+					}
+				} catch (error) {
+					console.error('Error fetching suggestions:', error);
+				}
+			}, 300); // 300ms delay
 		} catch (error) {
-			console.error('Autocomplete error:', error);
+			console.error('Error in handleInput:', error);
 		}
 	}
 
@@ -67,6 +102,7 @@ export default async function ui() {
 		const currentWeatherContainer =
 			document.querySelector('#currentWeather');
 		currentWeatherContainer.innerHTML = '';
+
 		const location = document.createElement('h2');
 		const region = document.createElement('p');
 		const currentTemp = document.createElement('p');
@@ -103,17 +139,20 @@ export default async function ui() {
 	function renderTodayForecast(weatherInfo) {
 		const todayForecastContainer = document.querySelector('#todayForecast');
 		todayForecastContainer.innerHTML = '';
-		
+
 		weatherInfo.todayForecast.forEach((hour) => {
 			const hourContainer = document.createElement('div');
 			const time = document.createElement('h2');
 			const temp = document.createElement('p');
 			const conditionImg = document.createElement('img');
-			
+
 			time.textContent = hour.time;
-			temp.textContent = currentUnit === 'f' ? `${Math.round(hour.temp)}°F` : `${Math.round(hour.temp)}°C`;
+			temp.textContent =
+				currentUnit === 'f'
+					? `${Math.round(hour.temp)}°F`
+					: `${Math.round(hour.temp)}°C`;
 			conditionImg.src = hour.conditionImgSrc;
-			
+
 			hourContainer.append(time, temp, conditionImg);
 			todayForecastContainer.appendChild(hourContainer);
 		});
@@ -130,29 +169,29 @@ export default async function ui() {
 				label: 'Humidity',
 				value: `${weatherInfo.currentWeather[0].humidity}%`,
 				icon: humidityImg,
-				unit: ''
+				unit: '',
 			},
 			{
 				label: 'Wind Speed',
 				value: weatherInfo.currentWeather[0].wind,
 				icon: windImg,
-				unit: 'KPH'
+				unit: 'KPH',
 			},
 			{
 				label: 'Sunrise',
 				value: weatherInfo.currentWeather[0].sunrise,
 				icon: sunriseImg,
-				unit: ''
+				unit: '',
 			},
 			{
 				label: 'Sunset',
 				value: weatherInfo.currentWeather[0].sunset,
 				icon: sunsetImg,
-				unit: ''
-			}
+				unit: '',
+			},
 		];
 
-		details.forEach(detail => {
+		details.forEach((detail) => {
 			const container = document.createElement('div');
 			const label = document.createElement('h2');
 			const imgElement = document.createElement('img');
@@ -161,7 +200,7 @@ export default async function ui() {
 			label.textContent = detail.label;
 			imgElement.src = detail.icon;
 			value.textContent = `${detail.value}${detail.unit ? ' ' + detail.unit : ''}`;
-			
+
 			container.append(label, imgElement, value);
 			todayWeatherDetailsContainer.appendChild(container);
 		});
@@ -171,7 +210,7 @@ export default async function ui() {
 		const futureForecastContainer =
 			document.querySelector('#futureForecast');
 		futureForecastContainer.innerHTML = '';
-		
+
 		weatherInfo.futureForecast.forEach((day) => {
 			const dayContainer = document.createElement('div');
 			const dayOfWeekContainer = document.createElement('h2');
@@ -179,22 +218,28 @@ export default async function ui() {
 			const maxTemp = document.createElement('p');
 			const minTemp = document.createElement('p');
 			const conditionImg = document.createElement('img');
-			
+
 			dayOfWeekContainer.textContent = day.dayOfWeek;
-			maxTemp.textContent = currentUnit === 'f' 
-				? `${Math.round(day.maxTemp)}°F` 
-				: `${Math.round(day.maxTemp)}°C`;
-			minTemp.textContent = currentUnit === 'f' 
-				? `${Math.round(day.minTemp)}°F` 
-				: `${Math.round(day.minTemp)}°C`;
+			maxTemp.textContent =
+				currentUnit === 'f'
+					? `${Math.round(day.maxTemp)}°F`
+					: `${Math.round(day.maxTemp)}°C`;
+			minTemp.textContent =
+				currentUnit === 'f'
+					? `${Math.round(day.minTemp)}°F`
+					: `${Math.round(day.minTemp)}°C`;
 			minTemp.style.opacity = '0.7';
 			conditionImg.src = day.conditionImgSrc;
-			
+
 			tempContainer.style.display = 'flex';
 			tempContainer.style.gap = '10px';
 			tempContainer.append(maxTemp, minTemp);
-			
-			dayContainer.append(dayOfWeekContainer, tempContainer, conditionImg);
+
+			dayContainer.append(
+				dayOfWeekContainer,
+				tempContainer,
+				conditionImg,
+			);
 			futureForecastContainer.appendChild(dayContainer);
 		});
 	}
@@ -213,15 +258,16 @@ export default async function ui() {
 		}
 	}
 
-	let currentUnit = 'c';
-
 	function renderTempUnitButton(unit) {
 		const changeTemperatureUnitBtn = document.querySelector(
 			'#changeTemperatureUnit',
 		);
-		changeTemperatureUnitBtn.textContent =
+		// Remove existing event listeners
+		changeTemperatureUnitBtn.replaceWith(changeTemperatureUnitBtn.cloneNode(true));
+		const newBtn = document.querySelector('#changeTemperatureUnit');
+		newBtn.textContent =
 			unit === 'f' ? 'Celsius °C' : 'Fahrenheit °F';
-		changeTemperatureUnitBtn.addEventListener(
+		newBtn.addEventListener(
 			'click',
 			tempUnitButtonClickHandler,
 		);
@@ -237,13 +283,25 @@ export default async function ui() {
 	function createFooter() {
 		const footer = document.querySelector('footer');
 		const copyrightParagraph = document.createElement('p');
-		copyrightParagraph.innerHTML = `Copyright &copy;<span id='year'>${new Date().getFullYear()}</span> sebastianmsz`;
-		const githubLink = document.createElement('a');
-		githubLink.href = 'https://github.com/sebastianmsz';
-		githubLink.target = '_blank';
-		githubLink.innerHTML =
-			'<i class="fa-brands fa-github" aria-hidden="true"></i>';
-		copyrightParagraph.appendChild(githubLink);
+		const currentYear = new Date().getFullYear();
+		
+		copyrightParagraph.innerHTML = `Copyright © ${currentYear} `;
+		
+		const authorLink = document.createElement('a');
+		authorLink.href = 'https://github.com/sebastianmsz';
+		authorLink.target = '_blank';
+		authorLink.rel = 'noopener noreferrer';
+		authorLink.setAttribute('aria-label', 'Visit Sebastian Molina\'s GitHub profile');
+		
+		const authorText = document.createElement('span');
+		authorText.textContent = 'sebastianmsz';
+		
+		const githubIcon = document.createElement('i');
+		githubIcon.className = 'fa-brands fa-github';
+		githubIcon.setAttribute('aria-hidden', 'true');
+		
+		authorLink.append(authorText, githubIcon);
+		copyrightParagraph.appendChild(authorLink);
 		footer.appendChild(copyrightParagraph);
 	}
 

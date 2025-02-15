@@ -1,7 +1,7 @@
 {
-	"name": "web-app-template",
+	"name": "solary",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Weather App",
 	"main": "index.js",
     "scripts": {
         "start": "webpack serve --open",
@@ -9,7 +9,7 @@
         "watch": "webpack --watch"
     },
 	"keywords": [],
-	"author": "",
+	"author": "Sebastian Molina",
 	"license": "ISC",
 	"devDependencies": {
 		"@babel/core": "^7.24.3",

@@ -119,14 +119,27 @@ function timeTo24Hour(time) {
 }
 
 async function autocomplete(input) {
-	const response = await fetch(
-		`https://api.weatherapi.com/v1/search.json?key=${AUTH_KEY}&q=${input}`,
-		{ mode: 'cors' },
-	);
-	const autocompletion = await response.json();
-	let formattedAutocompletion = [];
-	autocompletion.forEach((element) => {
-		formattedAutocompletion.push(element);
-	});
-	return formattedAutocompletion;
+    try {
+        const response = await fetch(
+            `https://api.weatherapi.com/v1/search.json?key=${AUTH_KEY}&q=${encodeURIComponent(input)}`,
+            { mode: 'cors' }
+        );
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch autocomplete suggestions');
+        }
+        
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+            return [];
+        }
+        
+        return data.map(item => ({
+            name: item.name,
+            region: item.region || item.country
+        }));
+    } catch (error) {
+        console.error('Autocomplete API error:', error);
+        return [];
+    }
 }
