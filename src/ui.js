@@ -4,15 +4,145 @@ import windImg from '../public/img/wind.svg';
 import sunriseImg from '../public/img/sunrise.svg';
 import sunsetImg from '../public/img/sunset.svg';
 import titleImg from '../public/img/title.svg';
+import '@fortawesome/fontawesome-free/js/solid';
 
 export default async function ui() {
-	let currentUnit = 'c';
+	let currentUnit = localStorage.getItem('weatherUnit') || 'c';
+	let lastLocation = localStorage.getItem('lastLocation') || 'London';
 	let searchTimeout;
+	let geolocationTimeout;
+	let lastKnownPosition = null;
+	let positionTimestamp = 0;
+	const POSITION_MAX_AGE = 5 * 60 * 1000;
 
-	// Set the title image
 	const titleImage = document.querySelector('#current > img');
 	if (titleImage) {
 		titleImage.src = titleImg;
+	}
+
+	function setupGeolocationButton() {
+		const locationButton = document.querySelector('#getCurrentLocation');
+		locationButton.addEventListener('click', handleGeolocation);
+	}
+
+	async function handleGeolocation() {
+		if (!("geolocation" in navigator)) {
+			alert('Geolocation is not supported by your browser');
+			return;
+		}
+
+		const locationButton = document.querySelector('#getCurrentLocation');
+		
+		if (geolocationTimeout) {
+			clearTimeout(geolocationTimeout);
+			geolocationTimeout = null;
+		}
+
+		if (locationButton.disabled) {
+			locationButton.disabled = false;
+			locationButton.style.opacity = '1';
+			return;
+		}
+
+		locationButton.disabled = true;
+		locationButton.style.opacity = '0.7';
+
+		const now = Date.now();
+		if (lastKnownPosition && (now - positionTimestamp < POSITION_MAX_AGE)) {
+			await updateWeatherWithPosition(lastKnownPosition);
+			locationButton.disabled = false;
+			locationButton.style.opacity = '1';
+			return;
+		}
+
+		try {
+			const position = await getCurrentPosition();
+			lastKnownPosition = position;
+			positionTimestamp = now;
+			await updateWeatherWithPosition(position);
+		} catch (error) {
+			handleGeolocationError(error);
+		} finally {
+			locationButton.disabled = false;
+			locationButton.style.opacity = '1';
+		}
+	}
+
+	function getCurrentPosition() {
+		return new Promise((resolve, reject) => {
+			const options = {
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: POSITION_MAX_AGE
+			};
+
+			geolocationTimeout = setTimeout(() => {
+				reject(new Error('Location request timed out'));
+			}, options.timeout + 1000); 
+
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					clearTimeout(geolocationTimeout);
+					resolve(position);
+				},
+				(error) => {
+					clearTimeout(geolocationTimeout);
+					reject(error);
+				},
+				options
+			);
+		});
+	}
+
+	async function updateWeatherWithPosition(position) {
+		try {
+			const { latitude, longitude } = position.coords;
+			const formattedLat = latitude.toFixed(4);
+			const formattedLon = longitude.toFixed(4);
+			const location = `${formattedLat},${formattedLon}`;
+			
+			const weatherInfo = await getFormattedWeatherInfo(location, currentUnit);
+			if (!weatherInfo) {
+				throw new Error('Failed to fetch weather data');
+			}
+			
+			localStorage.setItem('lastLocation', location);
+			await updateWeatherInfo(location);
+			
+			const searchInput = document.querySelector('#location-input');
+			if (searchInput && weatherInfo.location) {
+				searchInput.value = `${weatherInfo.location}, ${weatherInfo.region}`;
+			}
+		} catch (error) {
+			console.error('Weather API error:', error);
+			alert('Unable to fetch weather data for your location. Please try searching manually.');
+			throw error;
+		}
+	}
+
+	function handleGeolocationError(error) {
+		console.error('Geolocation error:', error);
+		let errorMessage = 'Unable to retrieve your location. ';
+		
+		if (error.code) {
+			switch (error.code) {
+				case error.PERMISSION_DENIED:
+					errorMessage += 'Please enable location access in your browser settings.';
+					break;
+				case error.POSITION_UNAVAILABLE:
+					errorMessage += 'Location information is unavailable.';
+					break;
+				case error.TIMEOUT:
+					errorMessage += 'Location request timed out.';
+					break;
+				default:
+					errorMessage += 'Please try searching manually.';
+			}
+		} else {
+			errorMessage += error.message || 'Please try searching manually.';
+		}
+		
+		alert(errorMessage);
 	}
 
 	function renderSearchBar() {
@@ -24,13 +154,11 @@ export default async function ui() {
 		completionsContainer.setAttribute('id', 'completionsContainer');
 
 		input.setAttribute('type', 'text');
-		input.setAttribute('placeholder', 'Enter location');
+		input.setAttribute('placeholder', 'Search location');
 		input.setAttribute('id', 'location-input');
 
-		// Remove any existing event listeners from document
 		document.removeEventListener('click', handleClickOutside);
 
-		// Add event listeners
 		input.addEventListener('input', handleInput);
 		input.addEventListener('focus', handleInput);
 		document.addEventListener('click', handleClickOutside);
@@ -60,18 +188,15 @@ export default async function ui() {
 			);
 			const input = document.querySelector('#location-input');
 
-			// Clear previous timeout
 			if (searchTimeout) {
 				clearTimeout(searchTimeout);
 			}
 
-			// Clear suggestions if input is too short
 			if (input.value.length < 3) {
 				completionsContainer.innerHTML = '';
 				return;
 			}
 
-			// Set new timeout to avoid too many API calls
 			searchTimeout = setTimeout(async () => {
 				try {
 					const completions = await autocomplete(input.value);
@@ -84,6 +209,7 @@ export default async function ui() {
 							completionDiv.addEventListener('click', () => {
 								input.value = `${completion.name}, ${completion.region}`;
 								completionsContainer.innerHTML = '';
+								localStorage.setItem('lastLocation', completion.name);
 								updateWeatherInfo(completion.name);
 							});
 							completionsContainer.appendChild(completionDiv);
@@ -92,7 +218,7 @@ export default async function ui() {
 				} catch (error) {
 					console.error('Error fetching suggestions:', error);
 				}
-			}, 300); // 300ms delay
+			}, 300); 
 		} catch (error) {
 			console.error('Error in handleInput:', error);
 		}
@@ -248,11 +374,15 @@ export default async function ui() {
 		try {
 			const unit = currentUnit;
 			const weatherInfo = await getFormattedWeatherInfo(city, unit);
-			renderCurrentWeather(weatherInfo);
-			renderTodayWeatherDetails(weatherInfo);
-			renderTodayForecast(weatherInfo);
-			renderFutureForecast(weatherInfo);
-			renderTempUnitButton(unit);
+			if (weatherInfo) {
+				localStorage.setItem('lastLocation', city);
+				localStorage.setItem('weatherUnit', unit);
+				renderCurrentWeather(weatherInfo);
+				renderTodayWeatherDetails(weatherInfo);
+				renderTodayForecast(weatherInfo);
+				renderFutureForecast(weatherInfo);
+				renderTempUnitButton(unit);
+			}
 		} catch (error) {
 			console.error('Error fetching weather information:', error);
 		}
@@ -262,7 +392,6 @@ export default async function ui() {
 		const changeTemperatureUnitBtn = document.querySelector(
 			'#changeTemperatureUnit',
 		);
-		// Remove existing event listeners
 		changeTemperatureUnitBtn.replaceWith(changeTemperatureUnitBtn.cloneNode(true));
 		const newBtn = document.querySelector('#changeTemperatureUnit');
 		newBtn.textContent =
@@ -274,9 +403,10 @@ export default async function ui() {
 	}
 
 	function tempUnitButtonClickHandler() {
-		const location = document.querySelector('#location').textContent;
+		const location = localStorage.getItem('lastLocation') || document.querySelector('#location').textContent;
 		const newUnit = currentUnit === 'f' ? 'c' : 'f';
 		currentUnit = newUnit;
+		localStorage.setItem('weatherUnit', newUnit);
 		updateWeatherInfo(location, newUnit);
 	}
 
@@ -305,6 +435,13 @@ export default async function ui() {
 		footer.appendChild(copyrightParagraph);
 	}
 
+	window.addEventListener('beforeunload', () => {
+		if (geolocationTimeout) {
+			clearTimeout(geolocationTimeout);
+		}
+	});
+
 	createFooter();
-	updateWeatherInfo('London', 'c');
+	setupGeolocationButton();
+	updateWeatherInfo(lastLocation, currentUnit);
 }

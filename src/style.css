@@ -128,7 +128,7 @@ table {
 :root {
 	--system-ui: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
 		'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-	--transparent-black: hsla(0, 0%, 0%, 0.305);
+	--transparent-black: hsla(0, 0%, 0%, 0.452);
 	--white: hsl(0, 0%, 90%);
 	--black: hsl(0, 0%, 10%);
 	--gray: hsl(0, 0%, 16%);
@@ -208,19 +208,71 @@ img {
 #parametersContainer > * {
 	flex: 1;
 }
-#current button {
+#parametersContainer button {
 	background-color: var(--transparent-black);
 	color: var(--white);
 	border: none;
 	border-radius: 0.5rem;
 	padding: 0.5rem;
-	top: 40px;
-	right: 40px;
 	height: 40px;
-	width: 16vw;
+	width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	justify-content: center;
+	align-items: center;
+	transition: all 0.2s ease-out;
+	transform: translateZ(0);
+}
+
+#parametersContainer button:hover:not(:disabled) {
+	background-color: var(--black);
+}
+
+#parametersContainer button:disabled {
+	cursor: not-allowed;
+	opacity: 0.7;
+}
+
+#parametersContainer button i {
+	transition: transform 0.2s ease-out;
+	backface-visibility: hidden;
+}
+
+#parametersContainer button:hover:not(:disabled) i {
+	transform: scale(1.2);
+}
+
+#parametersContainer button:active:not(:disabled) i {
+	transform: scale(0.95);
+}
+
+#parametersContainer button:disabled i {
+	animation: pulse 1s ease-out infinite;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1) translateZ(0);
+	}
+	50% {
+		transform: scale(1.2) translateZ(0);
+	}
+	100% {
+		transform: scale(1) translateZ(0);
+	}
+}
+
+/* Remove redundant individual button styles */
+#current button {
+	position: relative;
+	top: auto;
+	right: auto;
+	width: auto;
+}
+
+#getCurrentLocation:disabled {
+	cursor: wait !important;
 }
 #searchBarContainer {
 	height: fit-content;
@@ -233,9 +285,6 @@ img {
 	height: 40px;
 	border-radius: 0.5rem;
 	padding: 0.5rem;
-}
-#current button:hover {
-	background-color: var(--black);
 }
 #currentWeather {
 	background-color: var(--transparent-black);
@@ -443,7 +492,7 @@ img {
     }
 
     #forecast > div {
-        padding: 15px;
+        padding: 25px;
         gap: 15px;
     }
 
@@ -459,7 +508,7 @@ img {
     }
 
     #forecast > div {
-        padding: 10px;
+        padding: 20px;
         gap: 10px;
     }
 
@@ -549,3 +598,58 @@ footer a:focus {
     }
 }
 /*footer*/
+
+#getCurrentLocation {
+	justify-content: center;
+	align-items: center;
+	transition: all 0.2s ease-out;
+	transform: translateZ(0); /* Hardware acceleration */
+	will-change: transform, opacity; /* Optimize animations */
+}
+
+#getCurrentLocation:disabled {
+	cursor: wait;
+	opacity: 0.7;
+}
+
+#getCurrentLocation i {
+	transition: transform 0.2s ease-out;
+	backface-visibility: hidden; /* Prevent flicker */
+}
+
+#getCurrentLocation:not(:disabled) i {
+	animation: none;
+}
+
+#getCurrentLocation:disabled i {
+	animation: pulse 1s ease-out infinite;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1) translateZ(0);
+	}
+	50% {
+		transform: scale(1.2) translateZ(0);
+	}
+	100% {
+		transform: scale(1) translateZ(0);
+	}
+}
+
+/* Optimize mobile performance */
+@media (max-width: 768px) {
+    #getCurrentLocation {
+        transform: none;
+        transition: opacity 0.2s ease-out;
+    }
+    
+    #getCurrentLocation i {
+        transition: none;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+}

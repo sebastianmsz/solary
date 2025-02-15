@@ -2,24 +2,67 @@ import '@fortawesome/fontawesome-free/js/fontawesome';
 import '@fortawesome/fontawesome-free/js/brands';
 const AUTH_KEY = '2a5eb57601d6487a8e9194349242603';
 export { getFormattedWeatherInfo, autocomplete };
+
 async function getWeatherInfo(location) {
 	try {
-		const response = await fetch(
-			`https://api.weatherapi.com/v1/forecast.json?q=${location}&days=6&key=${AUTH_KEY}`,
-			{
-				mode: 'cors',
-			},
-		);
-		if (!response.ok) {
-			throw new Error('Failed to fetch weather data');
+		// Add optimized coordinate validation
+		const isCoordinates = location.includes(',');
+		if (isCoordinates) {
+			const [lat, lon] = location.split(',').map(coord => {
+				const parsed = parseFloat(coord);
+				return isFinite(parsed) ? parsed : null;
+			});
+			
+			if (lat === null || lon === null || 
+				lat < -90 || lat > 90 || 
+				lon < -180 || lon > 180) {
+				throw new Error('Invalid coordinates format or range');
+			}
 		}
-		const weatherInfo = await response.json();
-		return weatherInfo;
+
+		const abortController = new AbortController();
+		const timeoutId = setTimeout(() => abortController.abort(), 5000); // 5 second timeout
+
+		try {
+			const response = await fetch(
+				`https://api.weatherapi.com/v1/forecast.json?q=${encodeURIComponent(location)}&days=6&key=${AUTH_KEY}`,
+				{
+					mode: 'cors',
+					signal: abortController.signal
+				},
+			);
+
+			clearTimeout(timeoutId);
+
+			if (!response.ok) {
+				throw new Error(`Failed to fetch weather data: ${response.status}`);
+			}
+
+			const weatherInfo = await response.json();
+			
+			// Cache the successful response if it's coordinate-based
+			if (isCoordinates) {
+				try {
+					sessionStorage.setItem(`weather_${location}`, JSON.stringify({
+						data: weatherInfo,
+						timestamp: Date.now()
+					}));
+				} catch (e) {
+					console.warn('Failed to cache weather data:', e);
+				}
+			}
+
+			return weatherInfo;
+		} catch (error) {
+			clearTimeout(timeoutId);
+			throw error;
+		}
 	} catch (error) {
 		console.error('Error fetching weather data:', error);
 		return null;
 	}
 }
+
 async function getFormattedWeatherInfo(location, tempUnit) {
 	try {
 		const weatherInfo = await getWeatherInfo(location, tempUnit);
@@ -71,7 +114,6 @@ async function getFormattedWeatherInfo(location, tempUnit) {
 		}
 
 		const futureForecastDays = weatherInfo.forecast.forecastday;
-		console.log(futureForecastDays);
 		futureForecastDays.forEach((day) => {
 			let date = day.date.split('-');
 			let dayOfWeek = new Date(
